@@ -1,7 +1,7 @@
 {
   "name": "ci-watch",
   "displayName": "CI Watch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Live panel of test and CI progress beside the chat (24/245 · test_name), with a stall watchdog that wakes the agent when tests or GitHub Actions hang or finish.",
   "author": {
     "name": "Mateusz Sury",

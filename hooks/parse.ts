@@ -350,13 +350,54 @@ export function flush(t: Tally): Tally {
 
 // ---------- commands ----------
 
+// A runner named as a word of its own: not part of a path (`$DIR/tsc`) or a
+// file name (`pytest.ini`).
 const TEST_COMMAND =
-  /\b(pytest|py\.test|tox|nox|jest|vitest|playwright|cypress|mocha|ava|phpunit|rspec|ctest|go\s+test|cargo\s+(?:test|nextest)|dotnet\s+test|mvnw?\s|gradlew?\s|bun\s+test|deno\s+test|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|e2e|ci|check|lint|typecheck|build|verify)\b|npx\s+(?:tsc|eslint|playwright|vitest|jest)|tsc\b|eslint\b|make\s+(?:test|check|ci|e2e)|just\s+(?:test|ci|check)|act\b|docker\s+(?:compose\s+)?(?:build|run)\b|docker\s+compose\s+.*\bup\b|ci\.(?:sh|ps1|py)\b|run-tests?)/i
+  /(?:^|[\s;&|(`'"]|\.\/)(?:pytest|py\.test|tox|nox|jest|vitest|playwright|cypress|mocha|ava|phpunit|rspec|ctest|go\s+test|cargo\s+(?:test|nextest)|dotnet\s+test|mvnw?|gradlew?|bun\s+test|deno\s+test|(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:test|e2e|ci|check|lint|typecheck|build|verify)|npx\s+(?:tsc|eslint|playwright|vitest|jest)|tsc|eslint|make\s+(?:test|check|ci|e2e)|just\s+(?:test|ci|check)|act|docker\s+(?:compose\b.*?\s)?(?:build|run)|docker\s+compose\b.*\sup)(?![\w./\\-])|ci\.(?:sh|ps1|py)\b|\brun-tests?\b/i
 
 // Following the logs of a test container (not of a dev server, which would read as a stall).
 const TEST_LOGS = /docker\s+(?:compose\b[^|;&]*?\s)?logs\b(?=.*(?:\s-f\b|--follow))(?=.*\b(?:tests?|e2e|ci|pytest|playwright)\b)/i
 
-export const isTestCommand = (command: string) => TEST_COMMAND.test(command) || TEST_LOGS.test(command)
+// Commands that only mention a runner: reading, searching, moving files, git, printing.
+const NOT_A_RUN = /^(?:git|echo|printf|cat|less|head|tail|grep|rg|sed|awk|ls|dir|rm|cp|mv|mkdir|touch|find|code|claude|which|where|type|Get-Content|Select-String|Remove-Item|Copy-Item|Write-Output|Write-Host)$/i
+
+/** The first word of a shell segment, past env assignments and `sudo`/`time`/`timeout N`. */
+function firstWord(segment: string) {
+  const words = segment.trim().split(/\s+/)
+  let i = 0
+  while (i < words.length) {
+    const w = words[i]!
+    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(w) || w === 'sudo' || w === 'time' || w === 'env') i += 1
+    else if (w === 'timeout') i += /^\d/.test(words[i + 1] ?? '') ? 2 : 1
+    else break
+  }
+  return words[i] ?? ''
+}
+
+/** Whether a command runs tests or CI: one of its shell segments starts a runner. */
+export function isTestCommand(command: string): boolean {
+  if (TEST_LOGS.test(command)) return true
+  // Split on separators, outside quotes, so `bash -c "cd x && pytest"` stays one segment.
+  const segments: string[] = []
+  let cur = ''
+  let quote = ''
+  for (let i = 0; i < command.length; i++) {
+    const ch = command[i]!
+    if (quote) {
+      if (ch === quote) quote = ''
+      cur += ch
+    } else if (ch === '"' || ch === "'") {
+      quote = ch
+      cur += ch
+    } else if (ch === ';' || ch === '\n' || ch === '|' || (ch === '&' && command[i + 1] === '&')) {
+      segments.push(cur)
+      cur = ''
+      if (ch !== ';' && ch !== '\n' && command[i + 1] === ch) i += 1
+    } else cur += ch
+  }
+  segments.push(cur)
+  return segments.some(seg => seg.trim() !== '' && !NOT_A_RUN.test(firstWord(seg)) && TEST_COMMAND.test(seg))
+}
 
 /** A foreground command that only waits (for CI, for time to pass). */
 export const isWaitCommand = (command: string) =>

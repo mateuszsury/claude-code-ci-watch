@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (2026-11-20)
+
+- A runner named inside a path or file name (`rm -rf $DIR/tsc`, `cat pytest.ini`) no longer starts a run. Commands that only read, search, move or commit files (`git`, `cat`, `grep`, `rm`, ...) are never test runs.
+- `docker compose -f <file> run|build` is detected like `docker compose run|build`.
+
 ## 0.1.0 (2026-11-20)
 
 First release.

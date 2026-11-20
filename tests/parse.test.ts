@@ -133,6 +133,32 @@ test('commands: which are tests, waits, GitHub runs', async () => {
   expect(labelOf("cat > x.sh <<'EOF'\necho hi\nEOF\ncd /d/app && pytest -v tests/")).toBe('pytest -v tests/')
 })
 
+// 0.1.0 tracked `rm -rf "$S/tsc"` as a test run: a runner's name inside a path counted.
+test('commands that only mention a runner are not test runs', async () => {
+  for (const cmd of [
+    'rm -rf "$S/tsc" "$S/tr.js"; ls "$S"',
+    'cat pytest.ini',
+    "git commit -m 'fix jest config'",
+    'grep -rn pytest src/ | head',
+    'code tests/playwright.config.ts',
+    'ls node_modules/.bin/vitest',
+  ]) {
+    expect([cmd, isTestCommand(cmd)]).toEqual([cmd, false])
+  }
+  for (const cmd of [
+    './gradlew test',
+    'uv run pytest -q',
+    'timeout 600 npx playwright test',
+    'bash -c "cd app && pytest -v"',
+    'echo start; pytest -v; echo done',
+    'CI=1 npm test',
+    './scripts/ci.sh',
+    'docker compose -f ci.yml run --rm tests',
+  ]) {
+    expect([cmd, isTestCommand(cmd)]).toEqual([cmd, true])
+  }
+})
+
 test('background output path and task notifications', async () => {
   const text =
     'Command running in background with ID: bmanz9mj3. Output is being written to: C:\\Temp\\tasks\\bmanz9mj3.output. You will be notified when it completes'
