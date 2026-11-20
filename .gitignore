@@ -1,0 +1,13 @@
+# Written by Claude Code at every load: the API types of the running build
+.claude-plugin/types/
+tsconfig.json
+
+# OS and editors
+.DS_Store
+Thumbs.db
+*~
+*.swp
+.idea/
+.vscode/
+
+*.log

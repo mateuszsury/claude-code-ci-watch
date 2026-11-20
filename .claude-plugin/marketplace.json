@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-code-ci-watch",
+  "description": "CI Watch: live test and CI progress for Claude Code, with a stall watchdog that wakes the agent.",
+  "owner": {
+    "name": "Mateusz Sury",
+    "url": "https://github.com/mateuszsury"
+  },
+  "plugins": [
+    {
+      "name": "ci-watch",
+      "displayName": "CI Watch",
+      "description": "Live panel of test and CI progress beside the chat (24/245 · test_name), with a stall watchdog that wakes the agent when tests or GitHub Actions hang or finish.",
+      "source": "./",
+      "category": "development",
+      "keywords": ["ci", "tests", "github-actions", "docker", "watchdog"],
+      "version": "0.1.0",
+      "author": { "name": "Mateusz Sury" }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "ci-watch",
+  "displayName": "CI Watch",
+  "version": "0.1.0",
+  "description": "Live panel of test and CI progress beside the chat (24/245 · test_name), with a stall watchdog that wakes the agent when tests or GitHub Actions hang or finish.",
+  "author": {
+    "name": "Mateusz Sury",
+    "url": "https://github.com/mateuszsury"
+  },
+  "homepage": "https://github.com/mateuszsury/claude-code-ci-watch",
+  "repository": "https://github.com/mateuszsury/claude-code-ci-watch",
+  "license": "MIT",
+  "keywords": ["ci", "tests", "testing", "github-actions", "docker", "pytest", "playwright", "jest", "vitest", "watchdog", "panel"],
+  "types": "./types/index.d.ts"
+}
