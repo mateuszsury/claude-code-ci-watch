@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 (2026-11-20)
+
+- **GitHub runs found by themselves**: after `git push` to GitHub, `gh pr merge` and `gh workflow run`, the runs they started are looked up and tracked. All the runs of one push are one group, and the agent hears once, when the last one ends.
+- **PR checks**: `gh pr checks [pr]`, `/ci pr [n]` and `track { pr }` follow a pull request's checks from any CI that reports to GitHub, with a message when they end.
+- **Builds and deploys** are categories of their own, each with its own stall limit (10 and 20 min): `docker build`, `cargo build`, `npm run build`…, and `docker push/save`, `kubectl`, `helm`, `terraform`, cloud CLIs, deploy and release scripts (also over `ssh`), but not their `status`/`logs` queries.
+- **Percentages**: cards, the minimized pane and the status line show `4/7 · 57%`; builds that print no count use the last percentage they print (git, webpack, gradle, pip) and cargo's crate count.
+- **Far fewer false runs**: commands are read like a shell reads them (quotes, escapes, `$(…)`, line continuations, heredocs) and wrappers are looked through, so a runner named in a path, a commit message, an inline script (`node -e`, `python -c`), a heredoc body, a `--version` query or `bash -n` no longer counts; `npm ci` is an install, not CI. Checked against 26,000 commands from real sessions.
+- **Quick foreground commands** get no card: a card appears only after 10 s.
+- **Options** in the config menu: stall limits for tests, builds, deploys, CI and queues; `autoTrackGitHub`; `wakeOnCiFinish`.
+- A GitHub Actions workflow runs `claude plugin validate` and `claude plugin test` on every push.
+
 ## 0.1.1 (2026-11-20)
 
 - A runner named inside a path or file name (`rm -rf $DIR/tsc`, `cat pytest.ini`) no longer starts a run. Commands that only read, search, move or commit files (`git`, `cat`, `grep`, `rm`, ...) are never test runs.

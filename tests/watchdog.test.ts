@@ -42,7 +42,7 @@ test('a background test run that goes quiet wakes the idle agent once', async ($
 
   await clock.advance(5 * 60_000)
   expect(seen.prompts.length).toBe(1)
-  expect(seen.prompts[0]).toContain('look stuck')
+  expect(seen.prompts[0]).toContain('looks stuck')
   expect(seen.prompts[0]).toContain('tests/test_a.py::test_two')
 
   await clock.advance(5 * 60_000)

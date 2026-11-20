@@ -17,6 +17,8 @@ export type Tally = {
   carry: string
   /** Vitest/jest: per-test lines were seen, so per-file counts are ignored. */
   granular?: boolean
+  /** The last percentage the output printed (git, webpack, gradle, pip…), for runs with no n/m count. */
+  percent?: number
   /** Summed per-assembly summaries (dotnet). */
   sum?: { passed: number; failed: number; skipped: number }
 }
@@ -41,14 +43,25 @@ export type RunStatus =
 
 export type Run = Tally & {
   id: string
-  /** log: a background command's output file; fg: a foreground command; gh: a GitHub Actions run. */
-  kind: 'log' | 'fg' | 'gh'
+  /**
+   * log: a background command's output file; fg: a foreground command;
+   * gh: a GitHub Actions run; pr: a pull request's checks.
+   */
+  kind: 'log' | 'fg' | 'gh' | 'pr'
+  /** What a command run is: tests and checks, a build, a deploy (each with its own stall limit). */
+  category?: 'tests' | 'build' | 'deploy'
   label: string
   status: RunStatus
   path?: string
   offset: number
   taskId?: string
   ghRunId?: string
+  /** pr: the PR as gh takes it (number, URL or branch); absent for the current branch's. */
+  pr?: string
+  /** Runs found for one push, merge or dispatch: the agent hears once, when all have ended. */
+  group?: string
+  /** What the stall watch compares for gh and pr runs. */
+  signature?: string
   repo?: string
   /** Where `gh` runs when no repo is named. */
   cwd?: string
@@ -65,6 +78,8 @@ export type Run = Tally & {
   isAlerted: boolean
   /** Tell the agent when this run ends (GitHub runs: the harness does not). */
   wakeOnFinish: boolean
+  /** The agent was told this run ended. */
+  isReported?: boolean
 }
 
 export type TurnState = { isBusy: boolean; turnId?: string }

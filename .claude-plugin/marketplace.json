@@ -14,7 +14,7 @@
       "source": "./",
       "category": "development",
       "keywords": ["ci", "tests", "github-actions", "docker", "watchdog"],
-      "version": "0.1.1",
+      "version": "0.2.0",
       "author": { "name": "Mateusz Sury" }
     }
   ]
